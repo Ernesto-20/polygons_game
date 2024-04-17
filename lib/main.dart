@@ -1,16 +1,20 @@
 import 'dart:math';
 
 import 'package:audioplayers/audioplayers.dart';
+import 'package:circule_game/clip_shadow_path.dart';
 import 'package:circule_game/figure.dart';
 import 'package:circule_game/figure_view.dart';
+import 'package:circule_game/menu.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 
 void main() {
   runApp(const MyApp());
 }
 
 const int xDimension = 4;
-const int yDimension = 4;
+const int yDimension = 5;
 
 const double gridWidth = 90;
 const double gridHeight = 90;
@@ -186,91 +190,152 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
     return Scaffold(
         body: Container(
       color: const Color.fromRGBO(40, 43, 45, 1),
-      child: GestureDetector(
-        onVerticalDragUpdate: (details){
-          print('Vertical');
-          // Swiping in up direction.
-          if (details.delta.dy > 0) {
-            print('Down');
-            if (!_isTransicion()) {
-              _calculateSpace(Move.down);
-              currentMovement = Move.down;
-              controllerMovements
-                ..reset()
-                ..forward();
-            }
-          }
-          if (details.delta.dy < 0) {
-            print('Up');
-            if (!_isTransicion()) {
-              _calculateSpace(Move.up);
-              currentMovement = Move.up;
-              controllerMovements
-                ..reset()
-                ..forward();
-            } 
-          }
-        },
-        onHorizontalDragUpdate: (details) {
-          print('Horizontal');
-          // Swiping in right direction.
-          if (details.delta.dx > 0) {
-            print('Right');
-            if (!_isTransicion()) {
-              _calculateSpace(Move.right);
-              currentMovement = Move.right;
-              controllerMovements
-                ..reset()
-                ..forward();
-            }
-          }
-          // Swiping in left direction.
-          if (details.delta.dx < 0) {
-            print('Left');
-            if (!_isTransicion()) {
-              _calculateSpace(Move.left);
-              currentMovement = Move.left;
-              controllerMovements
-                ..reset()
-                ..forward();
-            }
-          }
-        },
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: [
-            const SizedBox(),
-            Center(
-              child: SizedBox(
-                // color: Colors.blue.shade100,
-                width: xDimension * gridWidth,
-                height: yDimension * gridHeight,
-                child: Stack(
-                  //Canvas desing
-                  children: [
-                    Container(
-                      width: double.infinity,
-                      height: double.infinity,
-                      decoration: BoxDecoration(
-                          color: const Color.fromRGBO(30, 33, 35, 1),
-                          borderRadius: BorderRadius.circular(25)),
+      child: Column(
+        children: [
+          _buildHeader(),
+          Expanded(
+            child: GestureDetector(
+              onVerticalDragUpdate: (details) {
+                // Swiping in up direction.
+                if (details.delta.dy > 0) {
+                  if (!_isTransicion()) {
+                    _calculateSpace(Move.down);
+                    currentMovement = Move.down;
+                    controllerMovements
+                      ..reset()
+                      ..forward();
+                  }
+                }
+                if (details.delta.dy < 0) {
+                  if (!_isTransicion()) {
+                    _calculateSpace(Move.up);
+                    currentMovement = Move.up;
+                    controllerMovements
+                      ..reset()
+                      ..forward();
+                  }
+                }
+              },
+              onHorizontalDragUpdate: (details) {
+                // Swiping in right direction.
+                if (details.delta.dx > 0) {
+                  if (!_isTransicion()) {
+                    _calculateSpace(Move.right);
+                    currentMovement = Move.right;
+                    controllerMovements
+                      ..reset()
+                      ..forward();
+                  }
+                }
+                // Swiping in left direction.
+                if (details.delta.dx < 0) {
+                  if (!_isTransicion()) {
+                    _calculateSpace(Move.left);
+                    currentMovement = Move.left;
+                    controllerMovements
+                      ..reset()
+                      ..forward();
+                  }
+                }
+              },
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  // const SizedBox(),
+                  Container(
+                    height: 50,
+                    width: double.infinity,
+                    padding: const EdgeInsets.symmetric(horizontal: 30),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        IconButton(
+                            onPressed: () {},
+                            icon: const Icon(
+                              Icons.change_circle_rounded,
+                              size: 35,
+                              color: Color.fromRGBO(7, 112, 74, 1),
+                            ))
+                      ],
                     ),
-                    Stack(
-                      children: figuresPossitions
-                          .map((FigureInfo figure) =>
-                              _buildFigureWithPossition(figure))
-                          .toList(),
+                  ),
+                  Center(
+                    child: SizedBox(
+                      width: xDimension * gridWidth,
+                      height: yDimension * gridHeight,
+                      child: Stack(
+                        children: [
+                          Container(
+                            width: double.infinity,
+                            height: double.infinity,
+                            decoration: BoxDecoration(
+                                color: const Color.fromRGBO(30, 33, 35, 1),
+                                borderRadius: BorderRadius.circular(25)),
+                          ),
+                          Stack(
+                            children: figuresPossitions
+                                .map((FigureInfo figure) =>
+                                    _buildFigureWithPossition(figure))
+                                .toList(),
+                          ),
+                        ],
+                      ),
                     ),
-                  ],
-                ),
+                  ),
+                  _buildFooter()
+                ],
               ),
             ),
-            // Control
-            // _buildMovementController()
+          ),
+        ],
+      ),
+    ));
+  }
+
+  Container _buildFooter() {
+    return Container(
+      // height: 50,
+      width: double.infinity,
+      alignment: Alignment.center,
+      padding: const EdgeInsets.symmetric(vertical: 10),
+      // color: Colors.white,
+      child: const Text(
+        'Join the same polygons until you get the circle',
+        style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
+      ),
+    );
+  }
+
+  Widget _buildHeader() {
+    return ClipShadowPath(
+      clipper: HeaderClip(),
+      shadow: const BoxShadow(color: Colors.black87, blurRadius: 15),
+      child: Container(
+        padding: const EdgeInsets.only(bottom: 30),
+        height: 280,
+        width: double.infinity,
+        color: const Color.fromRGBO(30, 33, 35, 1),
+        child: Row(
+          children: [
+            const Menu(),
+            Expanded(
+                child: Row(
+              children: [
+                Container(
+                  alignment: Alignment.bottomLeft,
+                  child: Container(
+                    width: 1,
+                    height: 140,
+                    color: Colors.grey,
+                  ),
+                ),
+                const Expanded(child: InformationBar())
+              ],
+            )),
           ],
         ),
       ),
-    ));
+    );
   }
 
   Positioned _buildFigureWithPossition(FigureInfo figure) {
@@ -425,15 +490,15 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
       _calculateAvailabilityTop() {
     // Calculate and represent the current positions of figures in a two-dimensional array
     Map<int, Map<int, FigureInfo?>> arrayIndexPoss =
-        _initializaedArrayWithCurrentsPossitions();
+        _initializaedArrayWithCurrentsPossitions(byRow: false);
     List<({FigureInfo figure, int availableMovement})> available = [];
 
-    for (int column = 0; column < yDimension; column++) {
+    for (int column = 0; column < xDimension; column++) {
       int availableMovement = 0;
       List<({FigureInfo figure, int availableMovement})> availableInColumn = [];
 
       bool combined = false;
-      for (int row = 0; row < xDimension; row++) {
+      for (int row = 0; row < yDimension; row++) {
         if (arrayIndexPoss[column]![row] == null) {
           availableMovement++;
         } else if ((!combined) &&
@@ -468,15 +533,15 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
       _calculateAvailabilityDown() {
     // Calculate and represent the current positions of figures in a two-dimensional array
     Map<int, Map<int, FigureInfo?>> arrayIndexPoss =
-        _initializaedArrayWithCurrentsPossitions();
+        _initializaedArrayWithCurrentsPossitions(byRow: false);
     List<({FigureInfo figure, int availableMovement})> available = [];
 
-    for (int column = 0; column < yDimension; column++) {
+    for (int column = 0; column < xDimension; column++) {
       int availableMovement = 0;
       List<({FigureInfo figure, int availableMovement})> availableInColumn = [];
 
       bool combined = false;
-      for (int row = xDimension - 1; row >= 0; row--) {
+      for (int row = yDimension - 1; row >= 0; row--) {
         if (arrayIndexPoss[column]![row] == null) {
           availableMovement++;
         } else if ((!combined) &&
@@ -511,15 +576,15 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
       _calculateAvailabilityRight() {
     // Calculate and represent the current positions of figures in a two-dimensional array
     Map<int, Map<int, FigureInfo?>> arrayIndexPoss =
-        _initializaedArrayWithCurrentsPossitions();
+        _initializaedArrayWithCurrentsPossitions(byRow: false);
     List<({FigureInfo figure, int availableMovement})> available = [];
 
-    for (int row = 0; row < xDimension; row++) {
+    for (int row = 0; row < yDimension; row++) {
       int availableMovement = 0;
       List<({FigureInfo figure, int availableMovement})> availableInRow = [];
 
       bool combined = false;
-      for (int column = yDimension - 1; column >= 0; column--) {
+      for (int column = xDimension - 1; column >= 0; column--) {
         if (arrayIndexPoss[column]![row] == null) {
           availableMovement++;
         } else if ((!combined) &&
@@ -554,15 +619,15 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
       _calculateAvailabilityLeft() {
     // Calculate and represent the current positions of figures in a two-dimensional array
     Map<int, Map<int, FigureInfo?>> arrayIndexPoss =
-        _initializaedArrayWithCurrentsPossitions();
+        _initializaedArrayWithCurrentsPossitions(byRow: false);
     List<({FigureInfo figure, int availableMovement})> available = [];
 
-    for (int row = 0; row < xDimension; row++) {
+    for (int row = 0; row < yDimension; row++) {
       int availableMovement = 0;
       List<({FigureInfo figure, int availableMovement})> availableInRow = [];
 
       bool combined = false;
-      for (int column = 0; column < yDimension; column++) {
+      for (int column = 0; column < xDimension; column++) {
         if (arrayIndexPoss[column]![row] == null) {
           availableMovement++;
         } else if ((!combined) &&
@@ -606,12 +671,16 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
     figuresPossitions = temp..sort(((a, b) => a.id.compareTo(b.id)));
   }
 
-  Map<int, Map<int, FigureInfo?>> _initializaedArrayWithCurrentsPossitions() {
+  Map<int, Map<int, FigureInfo?>> _initializaedArrayWithCurrentsPossitions(
+      {bool byRow = true}) {
     Map<int, Map<int, FigureInfo?>> arrayIndexPoss = {};
-    for (int i = 0; i < xDimension; i++) {
+    int externalDimension = byRow ? xDimension : yDimension;
+    int internalDimension = byRow ? yDimension : xDimension;
+
+    for (int i = 0; i < externalDimension; i++) {
       // Initialize de array in -1 values.
       arrayIndexPoss[i] = {};
-      for (int j = 0; j < yDimension; j++) {
+      for (int j = 0; j < internalDimension; j++) {
         arrayIndexPoss[i]![j] = null;
       }
     }
@@ -648,17 +717,54 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
   }
 }
 
-// void _printResultAvailables(
-//     List<({FigureInfo figure, int availableMovement})> available) {
-//   for (({FigureInfo figure, int availableMovement}) temp in available) {}
-// }
+class InformationBar extends StatelessWidget {
+  const InformationBar({
+    super.key,
+  });
 
-// void printArray(Map<int, Map<int, FigureInfo>> array) {
-//   for (int i = 0; i < xDimension; i++) {
-//     String row = '';
-//     for (int j = 0; j < yDimension; j++) {
-//       row += '${array[j]![i]} ';
-//     }
-//     print(row);
-//   }
-// }
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 30),
+      child: const Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        verticalDirection: VerticalDirection.up,
+        // mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: [
+          Padding(
+            padding: EdgeInsets.symmetric(
+              vertical: 10,
+            ),
+            child: Text(
+              'Score: 150',
+              style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 20),
+            ),
+          ),
+          Padding(
+              padding: EdgeInsets.symmetric(
+                vertical: 5,
+              ),
+              child: Text(
+                'Best: 150',
+                style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 20),
+              )),
+          SizedBox(
+            height: 10,
+          ),
+          Text(
+            'Polygon',
+            style: TextStyle(
+                color: Colors.white, fontWeight: FontWeight.bold, fontSize: 34),
+          ),
+          // Expanded(child: SizedBox()),
+        ],
+      ),
+    );
+  }
+}
