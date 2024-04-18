@@ -1,16 +1,20 @@
 import 'dart:math';
 
-import 'package:circule_game/clip_shadow_path.dart';
-import 'package:circule_game/figure.dart';
+import 'package:circule_game/widgets/others/clip_shadow_path.dart';
+import 'package:circule_game/models/figure.dart';
 import 'package:flutter/material.dart';
 
 class FigureView extends StatefulWidget {
   const FigureView({
     super.key,
     required this.figureInfo,
+    required this.maxWidth,
+    required this.maxHeight,
   });
 
   final FigureInfo figureInfo;
+  final double maxWidth;
+  final double maxHeight;
 
   @override
   State<FigureView> createState() => _FigureViewState();
@@ -23,7 +27,6 @@ class _FigureViewState extends State<FigureView> with TickerProviderStateMixin {
   late final AnimationController controllerSpin;
   late Animation<double> animationSpin;
 
-  String stateId = '';
   late final Color color;
 
   late final CustomClipper<Path> form;
@@ -109,68 +112,55 @@ class _FigureViewState extends State<FigureView> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    return _buildKernel();
-  }
-
-  Widget _buildKernel() {
-    // print('lvl: ${widget.figureInfo.lvl}');
-
     return Container(
-        width: 90,
-        height: 90,
-        // color: Colors.orange.shade50,
+        width: widget.maxWidth,
+        height: widget.maxWidth,
+        color: Colors.blueGrey,
         alignment: Alignment.center,
-        // child: widget.figureInfo.lvl < 12
-        //     ? _buildTwoDimension()
-        //     : _buildThreeDimension(),
-        // child: _buildTwoDimension(),
         child: _buildTwoDimension());
   }
 
-  Widget _buildThreeDimension() {
-    return Container(
-      width: 40,
-      height: 40,
-      alignment: Alignment.center,
-      child: Pyramid(
-        value: controllerSpin.value,
-      ),
+  Widget _buildTwoDimension() {
+    return isCircule ? _buildCircule() : _buildRotatePolygon();
+  }
+
+  Widget _buildRotatePolygon() {
+    return AnimatedBuilder(
+      animation: controllerSpin,
+      builder: (BuildContext context, Widget? child) {
+        return Transform.rotate(
+          angle: controllerSpin.value * 2 * pi,
+          child: child,
+        );
+      },
+      child: SizedBox(
+          width: widget.figureInfo.levelUp
+              ? sizeForm / 2 * animationLevelUp.value + sizeForm / 2
+              : sizeForm,
+          height: widget.figureInfo.levelUp
+              ? sizeForm / 2 * animationLevelUp.value + sizeForm / 2
+              : sizeForm,
+          child: _buildPolygon()),
     );
   }
 
-  Widget _buildTwoDimension() {
-    return isCircule
-        ? _buildCircule()
-        : Transform.rotate(
-            angle: controllerSpin.value * 2 * pi,
-            child: SizedBox(
-                width: widget.figureInfo.levelUp
-                    ? sizeForm / 2 * animationLevelUp.value + sizeForm / 2
-                    : sizeForm,
-                height: widget.figureInfo.levelUp
-                    ? sizeForm / 2 * animationLevelUp.value + sizeForm / 2
-                    : sizeForm,
-                child: _buildPolygon()),
-          );
-  }
-
   Widget _buildCircule() {
-    // return Container(
-    //   decoration:
-    //       const BoxDecoration(color: Colors.white, shape: BoxShape.circle),
-    //   // child: Text('-'),
-    // );
-    return Container(
-        width: 40 + 10 * sin(controllerSpin.value * 2 * pi),
-        height: 50,
-        alignment: Alignment.center,
-        child: Sephere(value: controllerSpin.value));
+    return AnimatedBuilder(
+      animation: controllerSpin,
+      builder: ((context, child) => Container(
+            width: 40 + 10 * sin(controllerSpin.value * 2 * pi),
+            height: 50,
+            alignment: Alignment.center,
+            child: child,
+          )),
+      child: Sephere(value: controllerSpin.value),
+    );
   }
 
   Widget _buildPolygon({Color? test, bool text = true}) {
     return ClipShadowPath(
         clipper: form,
-        shadow: const BoxShadow(color: Colors.white12, blurRadius: 15),
+        shadow: const BoxShadow(color: Colors.black38, blurRadius: 15),
         child: Container(
             color: test ?? color,
             alignment: Alignment.center,
@@ -181,20 +171,6 @@ class _FigureViewState extends State<FigureView> with TickerProviderStateMixin {
                         fontWeight: FontWeight.bold, color: Colors.white),
                   )
                 : null));
-
-    // return ClipPath(
-    //   clipper: form,
-    //   child: Container(
-    //       color: test ?? color,
-    //       alignment: Alignment.center,
-    //       child: text
-    //           ? Text(
-    //               '${widget.figureInfo.lvl + 2}',
-    //               style: const TextStyle(
-    //                   fontWeight: FontWeight.bold, color: Colors.white),
-    //             )
-    //           : null),
-    // );
   }
 }
 
