@@ -115,7 +115,7 @@ class _FigureViewState extends State<FigureView> with TickerProviderStateMixin {
     return Container(
         width: widget.maxWidth,
         height: widget.maxWidth,
-        color: Colors.blueGrey,
+        // color: Colors.blueGrey,
         alignment: Alignment.center,
         child: _buildTwoDimension());
   }

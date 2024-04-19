@@ -1,3 +1,7 @@
+import 'dart:math';
+
+import 'package:circule_game/models/figure.dart';
+import 'package:circule_game/widgets/figure_view.dart';
 import 'package:circule_game/widgets/others/clip_shadow_path.dart';
 import 'package:flutter/material.dart';
 
@@ -11,7 +15,7 @@ class ScorePanel extends StatefulWidget {
 }
 
 class _ScorePanelState extends State<ScorePanel> {
-  bool isExpanded = false;
+  bool isExpanded = true;
 
   @override
   Widget build(BuildContext context) {
@@ -25,30 +29,35 @@ class _ScorePanelState extends State<ScorePanel> {
             height: isExpanded ? constraints.maxHeight - 28 : 280,
             width: double.infinity,
             color: const Color.fromRGBO(30, 33, 35, 1),
-            duration: const Duration(seconds: 1),
-            child: Row(
+            duration: const Duration(milliseconds: 400),
+            child: Stack(
               children: [
-                Menu(
-                  isExpandedPanel: isExpanded,
-                  backHome: backHome,
-                ),
-                Expanded(
-                    child: Row(
+                const FloatingFigures(),
+                Row(
                   children: [
-                    Container(
-                      padding: const EdgeInsets.only(top: 40),
-                      alignment: Alignment.center,
-                      child: Container(
-                        width: 1,
-                        height: constraints.maxHeight * 0.8,
-                        color: const Color.fromRGBO(50, 53, 55, 1),
-                      ),
+                    Menu(
+                      isExpandedPanel: isExpanded,
+                      backHome: backHome,
                     ),
                     Expanded(
-                        child: InformationBar(
-                            start: start, isExpandedPanel: isExpanded))
+                        child: Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.only(top: 40),
+                          alignment: Alignment.center,
+                          child: Container(
+                            width: 1,
+                            height: constraints.maxHeight * 0.8,
+                            color: const Color.fromRGBO(50, 53, 55, 1),
+                          ),
+                        ),
+                        Expanded(
+                            child: InformationBar(
+                                start: start, isExpandedPanel: isExpanded))
+                      ],
+                    )),
                   ],
-                )),
+                ),
               ],
             ),
           ),
@@ -87,11 +96,11 @@ class InformationBar extends StatelessWidget {
 
   Widget _buildContracted(BuildContext context) {
     return AnimatedContainer(
-      duration: const Duration(seconds: 1),
+      duration: const Duration(milliseconds: 500),
       padding: const EdgeInsets.symmetric(
         horizontal: 30,
       ),
-      alignment: isExpandedPanel? Alignment.center: Alignment.topLeft,
+      alignment: isExpandedPanel ? Alignment.center : Alignment.topLeft,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
@@ -253,5 +262,98 @@ class HeaderClip extends CustomClipper<Path> {
   @override
   bool shouldReclip(covariant CustomClipper<Path> oldClipper) {
     return true;
+  }
+}
+
+class FloatingFigures extends StatefulWidget {
+  const FloatingFigures({super.key});
+
+  @override
+  State<FloatingFigures> createState() => _FloatingFiguresState();
+}
+
+class _FloatingFiguresState extends State<FloatingFigures>
+    with TickerProviderStateMixin {
+  late final AnimationController _controllerMoving;
+  late Animation<double> animationMovements;
+
+  @override
+  void initState() {
+    super.initState();
+
+    _controllerMoving =
+        AnimationController(vsync: this, duration: const Duration(seconds: 12))
+          ..repeat();
+    animationMovements =
+        Tween<double>(begin: 0, end: 1).animate(_controllerMoving)
+          ..addListener(() {
+            setState(() {});
+          });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    List<FigureInfo> figures = [
+      FigureInfo(id: 0, rowIndex: -1, columnIndex: -1, steps: -1, lvl: 5),
+      FigureInfo(id: 1, rowIndex: -1, columnIndex: -1, steps: -1, lvl: 2),
+      FigureInfo(id: 2, rowIndex: -1, columnIndex: -1, steps: -1, lvl: 1),
+      FigureInfo(id: 3, rowIndex: -1, columnIndex: -1, steps: -1, lvl: 7),
+    ];
+
+    return Stack(
+      children: [
+        Positioned(
+          top: -50*cos(animationMovements.value*2*pi),
+          right: 30+ 20*sin(animationMovements.value * 2 * pi),
+          // left: 200 + -50*sin(animationMovements.value * 2 * pi) ,
+          child: FigureView(
+            key: ValueKey(figures[0].id),
+            figureInfo: figures[0],
+            maxWidth: 40,
+            maxHeight: 40,
+          ),
+        ),
+
+        Positioned(
+          top: 300 + 200*cos(animationMovements.value * 2 * pi) + 30*sin(animationMovements.value * 1 * pi),
+          left: 150 + 100*cos(animationMovements.value * 2 * pi) + 10*sin(animationMovements.value * 1 * pi) ,
+          // left: 200 + -50*sin(animationMovements.value * 2 * pi) ,
+          child: FigureView(
+            key: ValueKey(figures[1].id),
+            figureInfo: figures[1],
+            maxWidth: 40,
+            maxHeight: 40,
+          ),
+        ),
+
+        Positioned(
+          bottom: 350 +  -80*cos(animationMovements.value*2*pi),
+          left: 200+ 20*sin(animationMovements.value * 2 * pi),
+          // left: 200 + -50*sin(animationMovements.value * 2 * pi) ,
+          child: FigureView(
+            key: ValueKey(figures[2].id),
+            figureInfo: figures[3],
+            maxWidth: 40,
+            maxHeight: 40,
+          ),
+        ),
+
+
+        Positioned(
+          bottom: -10*cos(animationMovements.value*2*pi),
+          left: 30+ 20*sin(animationMovements.value * 2 * pi),
+          // left: 200 + -50*sin(animationMovements.value * 2 * pi) ,
+          child: FigureView(
+            key: ValueKey(figures[2].id),
+            figureInfo: figures[2],
+            maxWidth: 40,
+            maxHeight: 40,
+          ),
+        ),
+
+
+
+      ],
+    );
   }
 }

@@ -7,7 +7,7 @@ import 'package:circule_game/models/figure.dart';
 import 'package:circule_game/widgets/figure_view.dart';
 import 'package:flutter/material.dart';
 
-const int heightDimension = 5;
+const int heightDimension = 6;
 const int widthDimension = 4;
 
 double gridWidth = 90;
@@ -33,13 +33,12 @@ class _GamePanelState extends State<GamePanel> with TickerProviderStateMixin {
   late List<FigureInfo> lastState;
   List<FigureInfo> figuresPossitions = [
     FigureInfo(
-        id: 0,
-        rowIndex: 4,
-        columnIndex: 3,
-        steps: 0,
-        lvl: 1,
-        color: Color.fromRGBO(Random().nextInt(255), Random().nextInt(255),
-            Random().nextInt(255), 1)),
+      id: 0,
+      rowIndex: 4,
+      columnIndex: 3,
+      steps: 0,
+      lvl: 1,
+    ),
     // FigureInfo(
     //     id: 1,
     //     rowIndex: 2,
@@ -88,8 +87,10 @@ class _GamePanelState extends State<GamePanel> with TickerProviderStateMixin {
                 for (int i = 0; i < figuresPossitions.length; i++) {
                   bool isCombined = false;
                   for (int j = i + 1; j < figuresPossitions.length; j++) {
-                    if ((figuresPossitions[i].rowIndex == figuresPossitions[j].rowIndex) &&
-                        (figuresPossitions[i].columnIndex == figuresPossitions[j].columnIndex) &&
+                    if ((figuresPossitions[i].rowIndex ==
+                            figuresPossitions[j].rowIndex) &&
+                        (figuresPossitions[i].columnIndex ==
+                            figuresPossitions[j].columnIndex) &&
                         !(indexDuplicated.contains(j))) {
                       isCombined = true;
                       indexDuplicated.add(j);
@@ -97,16 +98,12 @@ class _GamePanelState extends State<GamePanel> with TickerProviderStateMixin {
                         combinedFigures.add(figuresPossitions[i]
                           ..lvl = ++figuresPossitions[i].lvl
                           ..id = ++serialId
-                          ..levelUp = true
-                          ..color = Color.fromRGBO(Random().nextInt(255),
-                              Random().nextInt(255), Random().nextInt(255), 1));
+                          ..levelUp = true);
                       } else {
                         combinedFigures.add(figuresPossitions[j]
                           ..lvl = ++figuresPossitions[j].lvl
                           ..id = ++serialId
-                          ..levelUp = true
-                          ..color = Color.fromRGBO(Random().nextInt(255),
-                              Random().nextInt(255), Random().nextInt(255), 1));
+                          ..levelUp = true);
                       }
 
                       break;
@@ -121,7 +118,6 @@ class _GamePanelState extends State<GamePanel> with TickerProviderStateMixin {
                   ..sort((a, b) => a.id.compareTo(b.id));
 
                 _addNewFigure();
-
               }
             });
           });
@@ -149,14 +145,12 @@ class _GamePanelState extends State<GamePanel> with TickerProviderStateMixin {
       // Adding a new figure in the canvas
       ({int rowIndex, int columnIndex}) poss = _getNewPoss();
       figuresPossitions.add(FigureInfo(
-          id: ++serialId,
-          rowIndex: poss.rowIndex,
-          columnIndex: poss.columnIndex,
-          steps: 0,
-          lvl: 1,
-          color: Color.fromRGBO(Random().nextInt(255), Random().nextInt(255),
-              Random().nextInt(255), 1)));
-      print('Player');
+        id: ++serialId,
+        rowIndex: poss.rowIndex,
+        columnIndex: poss.columnIndex,
+        steps: 0,
+        lvl: 1,
+      ));
       final player = AudioPlayer();
       player
           .play(AssetSource('audio/beep.mp3'))
@@ -169,11 +163,13 @@ class _GamePanelState extends State<GamePanel> with TickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(builder: (context, constrains) {
-      double paddingTop = 25;
-      double paddingBottom = 25;
+      double paddingTop = 50;
+      double paddingBottom = 50;
 
       gridWidth = (constrains.maxWidth - (50)) ~/ widthDimension + 0.0;
-      gridHeight = (constrains.maxHeight - (paddingTop + paddingBottom)) ~/ heightDimension + 0.0;
+      gridHeight = (constrains.maxHeight - (paddingTop + paddingBottom)) ~/
+              heightDimension +
+          0.0;
 
       // print('gridWidth: $gridWidth');
       // print('gridHeight: $gridHeight');
@@ -272,7 +268,7 @@ class _GamePanelState extends State<GamePanel> with TickerProviderStateMixin {
                       ),
                     ),
                   ),
-                  // const FooterPanel()
+                  const FooterPanel()
                 ],
               ),
             ),
@@ -283,18 +279,39 @@ class _GamePanelState extends State<GamePanel> with TickerProviderStateMixin {
   }
 
   Positioned _buildFigureWithPossition(FigureInfo figure) {
-    print('Figure: ${figure.id}, poss( ${figure.rowIndex} , ${figure.columnIndex} ), steps: ${figure.steps},  value: ${animationMovements.value} )');
+    print(
+        'Figure: ${figure.id}, poss( ${figure.rowIndex} , ${figure.columnIndex} ), steps: ${figure.steps},  value: ${animationMovements.value} )');
     print('gridHeight: $gridHeight -- gridWidth: $gridWidth');
     return Positioned(
       top: (currentMovement == Move.down)
-          ? gridHeight * (figure.rowIndex +  figure.steps * (animationMovements.value == 1 ? 0 : animationMovements.value))
+          ? gridHeight *
+              (figure.rowIndex +
+                  figure.steps *
+                      (animationMovements.value == 1
+                          ? 0
+                          : animationMovements.value))
           : (currentMovement == Move.up)
-              ? gridHeight *(figure.rowIndex -  figure.steps * (animationMovements.value == 1 ? 0 : animationMovements.value))
+              ? gridHeight *
+                  (figure.rowIndex -
+                      figure.steps *
+                          (animationMovements.value == 1
+                              ? 0
+                              : animationMovements.value))
               : figure.rowIndex * gridHeight,
       left: currentMovement == Move.right
-          ? gridWidth * (figure.columnIndex + figure.steps * (animationMovements.value == 1 ? 0 : animationMovements.value))
+          ? gridWidth *
+              (figure.columnIndex +
+                  figure.steps *
+                      (animationMovements.value == 1
+                          ? 0
+                          : animationMovements.value))
           : currentMovement == Move.left
-              ? gridWidth * (figure.columnIndex - figure.steps * (animationMovements.value == 1 ? 0 : animationMovements.value))
+              ? gridWidth *
+                  (figure.columnIndex -
+                      figure.steps *
+                          (animationMovements.value == 1
+                              ? 0
+                              : animationMovements.value))
               : figure.columnIndex * gridWidth,
       child: FigureView(
         key: ValueKey(figure.id),
@@ -336,7 +353,8 @@ class _GamePanelState extends State<GamePanel> with TickerProviderStateMixin {
   List<({FigureInfo figure, int availableMovement})>
       _calculateAvailabilityTop() {
     // Calculate and represent the current positions of figures in a two-dimensional array
-    Map<int, Map<int, FigureInfo?>> arrayIndexPoss = _initializaedArrayWithCurrentsPossitions();
+    Map<int, Map<int, FigureInfo?>> arrayIndexPoss =
+        _initializaedArrayWithCurrentsPossitions();
     List<({FigureInfo figure, int availableMovement})> available = [];
 
     for (int column = 0; column < widthDimension; column++) {
@@ -375,9 +393,11 @@ class _GamePanelState extends State<GamePanel> with TickerProviderStateMixin {
     return available;
   }
 
-  List<({FigureInfo figure, int availableMovement})> _calculateAvailabilityDown() {
+  List<({FigureInfo figure, int availableMovement})>
+      _calculateAvailabilityDown() {
     // Calculate and represent the current positions of figures in a two-dimensional array
-    Map<int, Map<int, FigureInfo?>> arrayIndexPoss = _initializaedArrayWithCurrentsPossitions();
+    Map<int, Map<int, FigureInfo?>> arrayIndexPoss =
+        _initializaedArrayWithCurrentsPossitions();
     List<({FigureInfo figure, int availableMovement})> available = [];
 
     for (int column = 0; column < widthDimension; column++) {
@@ -402,7 +422,8 @@ class _GamePanelState extends State<GamePanel> with TickerProviderStateMixin {
             availableMovement: availableMovement
           ));
         } else {
-          print('Figure: ${arrayIndexPoss[row]![column]!.id} -> available: $availableMovement');
+          print(
+              'Figure: ${arrayIndexPoss[row]![column]!.id} -> available: $availableMovement');
 
           combined = false;
           availableInColumn.add((
@@ -504,11 +525,13 @@ class _GamePanelState extends State<GamePanel> with TickerProviderStateMixin {
     return available;
   }
 
-  void _refreshFigureWithNewAvailability(List<({FigureInfo figure, int availableMovement})> available) {
+  void _refreshFigureWithNewAvailability(
+      List<({FigureInfo figure, int availableMovement})> available) {
     List<FigureInfo> temp = [];
 
     for (({FigureInfo figure, int availableMovement}) aval in available) {
-      FigureInfo figure = figuresPossitions.firstWhere((e) => e.id == aval.figure.id);
+      FigureInfo figure =
+          figuresPossitions.firstWhere((e) => e.id == aval.figure.id);
       temp.add(figure..steps = aval.availableMovement);
     }
 
@@ -552,7 +575,10 @@ class _GamePanelState extends State<GamePanel> with TickerProviderStateMixin {
       }
     }
     int index = Random().nextInt(freePosition.length);
-    return (rowIndex: freePosition[index].rowIndex, columnIndex: freePosition[index].columnIndex);
+    return (
+      rowIndex: freePosition[index].rowIndex,
+      columnIndex: freePosition[index].columnIndex
+    );
   }
 
   void _cleanLevelUp() {
