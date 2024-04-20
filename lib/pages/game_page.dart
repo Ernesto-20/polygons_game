@@ -9,22 +9,29 @@ class GamePage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
-        color: const Color.fromRGBO(40, 43, 45, 1),
-        width: double.infinity,
-        height: double.infinity,
-        child: Stack(
-          children: [
-            Column(
+        color: const Color.fromRGBO(30, 33, 35, 1),
+        child: SafeArea(
+          
+          child: Container(
+            color: const Color.fromRGBO(40, 43, 45, 1),
+            // color: Colors.white24,
+            width: double.infinity,
+            height: double.infinity,
+            child: Stack(
               children: [
-                Container(
-                  height: 280,
+                Column(
+                  children: [
+                    Container(
+                      height: 280,
+                    ),
+                    const Expanded(child: GamePanel()),
+                    const FooterPage(),
+                  ],
                 ),
-                const Expanded(child: GamePanel()),
-                const FooterPage(),
+                const ScorePanel(),
               ],
             ),
-            const ScorePanel(),
-          ],
+          ),
         ),
       ),
     );
