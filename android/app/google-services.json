@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "710066439408",
+    "project_id": "polygon-game",
+    "storage_bucket": "polygon-game.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:710066439408:android:874a5b20c7153b5b126e35",
+        "android_client_info": {
+          "package_name": "com.example.circule_game"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB3CxAUU1kujJIqLc9h6ykcV9XijbqfIVc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
