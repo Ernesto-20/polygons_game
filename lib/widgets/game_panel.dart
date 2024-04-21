@@ -1,9 +1,12 @@
 import 'dart:math';
 
 import 'package:audioplayers/audioplayers.dart';
+import 'package:circule_game/blocs/game_pane/game_pane_bloc.dart';
 import 'package:circule_game/models/figure.dart';
+import 'package:circule_game/utils/colors.dart';
 import 'package:circule_game/widgets/figure_view.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 const int heightDimension = 5;
 const int widthDimension = 4;
@@ -12,9 +15,7 @@ double gridWidth = 90;
 double gridHeight = 90;
 
 class GamePanel extends StatefulWidget {
-  const GamePanel({super.key, required this.getEnableSound});
-
-  final Function getEnableSound;
+  const GamePanel({super.key});
 
   @override
   State<GamePanel> createState() => _GamePanelState();
@@ -26,6 +27,8 @@ class _GamePanelState extends State<GamePanel> with TickerProviderStateMixin {
   Move currentMovement = Move.right;
   late final AnimationController controllerMovements;
   late Animation<double> animationMovements;
+  bool hasPyramid = false;
+  int biggerLvl = 1;
 
   late List<({FigureInfo figure, int availableMovement})> availableSpace = [];
 
@@ -39,22 +42,6 @@ class _GamePanelState extends State<GamePanel> with TickerProviderStateMixin {
       steps: 0,
       lvl: 1,
     ),
-    // FigureInfo(
-    //     id: 1,
-    //     rowIndex: 2,
-    //     columnIndex: 1,
-    //     steps: 0,
-    //     lvl: 3,
-    //     color: Color.fromRGBO(Random().nextInt(255), Random().nextInt(255),
-    //         Random().nextInt(255), 1)),
-    // FigureInfo(
-    //     id: 2,
-    //     rowIndex: 4,
-    //     columnIndex: 2,
-    //     steps: 0,
-    //     lvl: 5,
-    //     color: Color.fromRGBO(Random().nextInt(255), Random().nextInt(255),
-    //         Random().nextInt(255), 1)),
   ];
 
   @override
@@ -84,6 +71,7 @@ class _GamePanelState extends State<GamePanel> with TickerProviderStateMixin {
                 // Combined
                 List<FigureInfo> combinedFigures = [];
                 List<int> indexDuplicated = [];
+                double points = 0;
                 for (int i = 0; i < figuresPossitions.length; i++) {
                   bool isCombined = false;
                   for (int j = i + 1; j < figuresPossitions.length; j++) {
@@ -95,15 +83,33 @@ class _GamePanelState extends State<GamePanel> with TickerProviderStateMixin {
                       isCombined = true;
                       indexDuplicated.add(j);
                       if (figuresPossitions[i].id > figuresPossitions[j].id) {
+                        points += (figuresPossitions[i].lvl + 1) *
+                            (figuresPossitions[j].lvl == -1 ? 200 : 10);
                         combinedFigures.add(figuresPossitions[i]
-                          ..lvl = ++figuresPossitions[i].lvl
+                          ..lvl = figuresPossitions[j].lvl != -1
+                              ? (++figuresPossitions[i].lvl)
+                              : (figuresPossitions[i].lvl > 1
+                                  ? --figuresPossitions[i].lvl
+                                  : figuresPossitions[i].lvl)
                           ..id = ++serialId
                           ..levelUp = true);
+                        biggerLvl = biggerLvl < figuresPossitions[i].lvl
+                            ? figuresPossitions[i].lvl
+                            : biggerLvl;
                       } else {
+                        points += (figuresPossitions[j].lvl + 1) *
+                            (figuresPossitions[i].lvl == -1 ? 200 : 10);
                         combinedFigures.add(figuresPossitions[j]
-                          ..lvl = ++figuresPossitions[j].lvl
+                          ..lvl = figuresPossitions[i].lvl != -1
+                              ? (++figuresPossitions[j].lvl)
+                              : (figuresPossitions[j].lvl > 1
+                                  ? --figuresPossitions[j].lvl
+                                  : figuresPossitions[j].lvl)
                           ..id = ++serialId
                           ..levelUp = true);
+                          biggerLvl = biggerLvl < figuresPossitions[j].lvl
+                            ? figuresPossitions[j].lvl
+                            : biggerLvl;
                       }
 
                       break;
@@ -118,7 +124,10 @@ class _GamePanelState extends State<GamePanel> with TickerProviderStateMixin {
                   ..sort((a, b) => a.id.compareTo(b.id));
 
                 if (indexDuplicated.isNotEmpty) {
-                  if (widget.getEnableSound() ) {
+                  context
+                      .read<GamePaneBloc>()
+                      .add(GamePaneScoreIncreased(increase: points));
+                  if (context.read<GamePaneBloc>().state.enableSound) {
                     AudioPlayer player = AudioPlayer();
                     player.setVolume(0.2);
                     player.play(AssetSource('audio/beep2.mp4'));
@@ -126,6 +135,7 @@ class _GamePanelState extends State<GamePanel> with TickerProviderStateMixin {
                 }
 
                 _addNewFigure();
+                print('Bigger: $biggerLvl');
               }
             });
           });
@@ -146,18 +156,27 @@ class _GamePanelState extends State<GamePanel> with TickerProviderStateMixin {
           break;
         }
       }
-    }else {
+    } else {
       areEqual = false;
     }
     if (!areEqual) {
       // Adding a new figure in the canvas
+      int rm = Random().nextInt(100);
+      int lvl = 1;
+      if (!hasPyramid && rm < 5) {
+        hasPyramid = true;
+        lvl = -1;
+      } else if (rm < 10) {
+        lvl = 3;
+      }
+
       ({int rowIndex, int columnIndex}) poss = _getNewPoss();
       figuresPossitions.add(FigureInfo(
         id: ++serialId,
         rowIndex: poss.rowIndex,
         columnIndex: poss.columnIndex,
         steps: 0,
-        lvl: 1,
+        lvl: lvl,
       ));
     }
 
@@ -237,7 +256,7 @@ class _GamePanelState extends State<GamePanel> with TickerProviderStateMixin {
                             icon: const Icon(
                               Icons.change_circle_rounded,
                               size: 35,
-                              color: Color.fromRGBO(7, 112, 74, 1),
+                              color: acent,
                             ))
                       ],
                     ),
@@ -252,8 +271,9 @@ class _GamePanelState extends State<GamePanel> with TickerProviderStateMixin {
                             width: double.infinity,
                             height: double.infinity,
                             decoration: BoxDecoration(
-                                color: const Color.fromRGBO(30, 33, 35, 1),
-                                borderRadius: BorderRadius.circular(25)),
+                                // color: const Color.fromRGBO(30, 33, 35, 1),
+                                color: darkSecondary,
+                                borderRadius: BorderRadius.circular(5)),
                           ),
                           Stack(
                             children: figuresPossitions
@@ -364,7 +384,9 @@ class _GamePanelState extends State<GamePanel> with TickerProviderStateMixin {
             (availableInColumn.last.figure.id !=
                 arrayIndexPoss[row]![column]!.id) &&
             (availableInColumn.last.figure.lvl ==
-                arrayIndexPoss[row]![column]!.lvl)) {
+                    arrayIndexPoss[row]![column]!.lvl ||
+                _pyramidRestroid(
+                    availableInColumn, arrayIndexPoss, row, column))) {
           availableMovement++;
           combined = true;
 
@@ -387,6 +409,23 @@ class _GamePanelState extends State<GamePanel> with TickerProviderStateMixin {
     return available;
   }
 
+  bool _pyramidRestroid(
+      List<({int availableMovement, FigureInfo figure})> availableInColumn,
+      Map<int, Map<int, FigureInfo?>> arrayIndexPoss,
+      int row,
+      int column) {
+    bool check = (availableInColumn.last.figure.lvl == -1 &&
+            arrayIndexPoss[row]![column]!.lvl == biggerLvl) ||
+        (arrayIndexPoss[row]![column]!.lvl == -1 &&
+            availableInColumn.last.figure.lvl == biggerLvl);
+
+    if (check) {
+      hasPyramid = false;
+    }
+
+    return check;
+  }
+
   List<({FigureInfo figure, int availableMovement})>
       _calculateAvailabilityDown() {
     // Calculate and represent the current positions of figures in a two-dimensional array
@@ -407,7 +446,9 @@ class _GamePanelState extends State<GamePanel> with TickerProviderStateMixin {
             (availableInColumn.last.figure.id !=
                 arrayIndexPoss[row]![column]!.id) &&
             (availableInColumn.last.figure.lvl ==
-                arrayIndexPoss[row]![column]!.lvl)) {
+                    arrayIndexPoss[row]![column]!.lvl ||
+                _pyramidRestroid(
+                    availableInColumn, arrayIndexPoss, row, column))) {
           availableMovement++;
           combined = true;
 
@@ -450,7 +491,9 @@ class _GamePanelState extends State<GamePanel> with TickerProviderStateMixin {
             (availableInRow.last.figure.id !=
                 arrayIndexPoss[row]![column]!.id) &&
             (availableInRow.last.figure.lvl ==
-                arrayIndexPoss[row]![column]!.lvl)) {
+                    arrayIndexPoss[row]![column]!.lvl ||
+                _pyramidRestroid(
+                    availableInRow, arrayIndexPoss, row, column))) {
           availableMovement++;
           combined = true;
 
@@ -493,7 +536,9 @@ class _GamePanelState extends State<GamePanel> with TickerProviderStateMixin {
             (availableInRow.last.figure.id !=
                 arrayIndexPoss[row]![column]!.id) &&
             (availableInRow.last.figure.lvl ==
-                arrayIndexPoss[row]![column]!.lvl)) {
+                    arrayIndexPoss[row]![column]!.lvl ||
+                _pyramidRestroid(
+                    availableInRow, arrayIndexPoss, row, column))) {
           availableMovement++;
           combined = true;
 
