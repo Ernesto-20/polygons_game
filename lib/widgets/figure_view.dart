@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import 'package:circule_game/utils/colors.dart';
 import 'package:circule_game/widgets/others/clip_shadow_path.dart';
 import 'package:circule_game/models/figure.dart';
 import 'package:flutter/material.dart';
@@ -66,7 +67,7 @@ class _FigureViewState extends State<FigureView> with TickerProviderStateMixin {
     } else if (widget.figureInfo.lvl == 2) {
       form = Square();
       sizeForm = 30;
-      color = const Color.fromRGBO(255, 204, 0, 1);
+      color = const Color.fromARGB(255, 19, 84, 24);
     } else if (widget.figureInfo.lvl == 3) {
       form = Pentagon();
       color = Colors.blue.shade500;
@@ -117,11 +118,34 @@ class _FigureViewState extends State<FigureView> with TickerProviderStateMixin {
         height: widget.maxWidth,
         // color: Colors.blueGrey,
         alignment: Alignment.center,
-        child: _buildTwoDimension());
+        child: widget.figureInfo.lvl != -1
+            ? _buildTwoDimension()
+            : _buildThreeDimension());
   }
 
   Widget _buildTwoDimension() {
     return isCircule ? _buildCircule() : _buildRotatePolygon();
+  }
+
+  Widget _buildThreeDimension() {
+    return AnimatedBuilder(
+      animation: controllerSpin,
+      builder: (BuildContext context, Widget? child) {
+        // return Transform.rotate(
+        //   angle: controllerSpin.value * 2 * pi,
+        //   child: child,
+        // );
+        return child!;
+      },
+      child: SizedBox(
+          width:
+              widget.figureInfo.levelUp ? 14 * animationLevelUp.value + 14 : 30,
+          height:
+              widget.figureInfo.levelUp ? 14 * animationLevelUp.value + 14 : 30,
+          child: Pyramid(
+            value: controllerSpin.value,
+          )),
+    );
   }
 
   Widget _buildRotatePolygon() {
@@ -148,7 +172,7 @@ class _FigureViewState extends State<FigureView> with TickerProviderStateMixin {
     return AnimatedBuilder(
       animation: controllerSpin,
       builder: ((context, child) => Container(
-            width: 40 + 10 * sin(controllerSpin.value * 2 * pi),
+            width: sizeForm -5 + 5 * sin(controllerSpin.value * 2 * pi),
             height: 50,
             alignment: Alignment.center,
             child: child,
@@ -160,7 +184,7 @@ class _FigureViewState extends State<FigureView> with TickerProviderStateMixin {
   Widget _buildPolygon({Color? test, bool text = true}) {
     return ClipShadowPath(
         clipper: form,
-        shadow: const BoxShadow(color: Colors.black38, blurRadius: 15),
+        shadow: const BoxShadow(color: darkSecondary, blurRadius: 1),
         child: Container(
             color: test ?? color,
             alignment: Alignment.center,
@@ -550,26 +574,28 @@ class Pyramid extends StatelessWidget {
           Transform(
               alignment: FractionalOffset.bottomCenter,
               transform: Matrix4.identity()
-                ..translate(20.0, .0, 0.0)
+                ..translate(17.0, .0, 0.0)
                 ..rotateY(.25 * 2 * pi)
-                ..rotateX(0.53),
-              child: _buildPolygon(color: Colors.green, text: false)),
+                ..rotateX(0.62),
+              child: _buildPolygon(
+                  color: Colors.greenAccent.shade700, text: false)),
 
           Transform(
               alignment: FractionalOffset.bottomCenter,
               transform: Matrix4.identity()
-                ..translate(-20.0, .0, 0.0)
+                ..translate(-17.0, .0, 0.0)
                 ..rotateY(.75 * 2 * pi)
-                ..rotateX(0.53),
-              child: _buildPolygon(color: Colors.green, text: false)),
+                ..rotateX(0.62),
+              child: _buildPolygon(
+                  color: Colors.greenAccent.shade700, text: false)),
 
           Transform(
               // correct
               alignment: FractionalOffset.bottomCenter,
               transform: Matrix4.identity()
-                ..translate(0.1, .0, 20.5)
-                ..rotateX(0.53),
-              child: _buildPolygon(color: Colors.green.shade900, text: false)),
+                ..translate(0.1, .0, 17.5)
+                ..rotateX(0.62),
+              child: _buildPolygon(color: Colors.green, text: false)),
           // ),
         ],
       ),
@@ -580,7 +606,8 @@ class Pyramid extends StatelessWidget {
     return ClipPath(
         clipper: Triangle(),
         child: Container(
-            color: color,
+            decoration: BoxDecoration(
+            gradient: LinearGradient(colors: [color, Colors.yellow.shade700], begin: Alignment.topCenter, end: Alignment.bottomCenter)),
             alignment: Alignment.center,
             child: text
                 ? const Text(
