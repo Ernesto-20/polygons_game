@@ -1,6 +1,4 @@
-
 import 'package:circule_game/pages/game_page.dart';
-import 'package:circule_game/widgets/game_panel.dart';
 import 'package:flutter/material.dart';
 
 void main() {
@@ -16,8 +14,6 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Circular Game Demo',
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-        primaryColor: const Color.fromRGBO(7, 112, 74, 1),
         useMaterial3: true,
       ),
       home: const GamePage(),
