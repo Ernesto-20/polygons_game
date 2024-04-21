@@ -1,5 +1,3 @@
-// ignore_for_file: avoid_print
-
 import 'dart:math';
 
 import 'package:audioplayers/audioplayers.dart';
@@ -7,14 +5,16 @@ import 'package:circule_game/models/figure.dart';
 import 'package:circule_game/widgets/figure_view.dart';
 import 'package:flutter/material.dart';
 
-const int heightDimension = 6;
+const int heightDimension = 5;
 const int widthDimension = 4;
 
 double gridWidth = 90;
 double gridHeight = 90;
 
 class GamePanel extends StatefulWidget {
-  const GamePanel({super.key});
+  const GamePanel({super.key, required this.getEnableSound});
+
+  final Function getEnableSound;
 
   @override
   State<GamePanel> createState() => _GamePanelState();
@@ -60,7 +60,7 @@ class _GamePanelState extends State<GamePanel> with TickerProviderStateMixin {
   @override
   void initState() {
     super.initState();
-    lastState = List.from(figuresPossitions);
+    lastState = figuresPossitions.map((e) => e.copyWidth()).toList();
     controllerMovements = AnimationController(
         vsync: this, duration: const Duration(milliseconds: 400));
 
@@ -117,6 +117,14 @@ class _GamePanelState extends State<GamePanel> with TickerProviderStateMixin {
                 figuresPossitions = combinedFigures
                   ..sort((a, b) => a.id.compareTo(b.id));
 
+                if (indexDuplicated.isNotEmpty) {
+                  if (widget.getEnableSound() ) {
+                    AudioPlayer player = AudioPlayer();
+                    player.setVolume(0.2);
+                    player.play(AssetSource('audio/beep2.mp4'));
+                  }
+                }
+
                 _addNewFigure();
               }
             });
@@ -130,18 +138,18 @@ class _GamePanelState extends State<GamePanel> with TickerProviderStateMixin {
   }
 
   void _addNewFigure() async {
-    bool notEqual = false;
-
+    bool areEqual = true;
     if (lastState.length == figuresPossitions.length) {
       for (int i = 0; i < lastState.length; i++) {
         if (lastState[i] != figuresPossitions[i]) {
-          notEqual = true;
+          areEqual = false;
           break;
         }
       }
+    }else {
+      areEqual = false;
     }
-
-    if (!notEqual) {
+    if (!areEqual) {
       // Adding a new figure in the canvas
       ({int rowIndex, int columnIndex}) poss = _getNewPoss();
       figuresPossitions.add(FigureInfo(
@@ -151,13 +159,9 @@ class _GamePanelState extends State<GamePanel> with TickerProviderStateMixin {
         steps: 0,
         lvl: 1,
       ));
-      final player = AudioPlayer();
-      player
-          .play(AssetSource('audio/beep.mp3'))
-          .then((value) => print('Player.play'));
     }
 
-    lastState = List.from(figuresPossitions);
+    lastState = figuresPossitions.map((e) => e.copyWidth()).toList();
   }
 
   @override
@@ -171,9 +175,6 @@ class _GamePanelState extends State<GamePanel> with TickerProviderStateMixin {
               heightDimension +
           0.0;
 
-      // print('gridWidth: $gridWidth');
-      // print('gridHeight: $gridHeight');
-
       return Column(
         children: [
           Expanded(
@@ -182,7 +183,6 @@ class _GamePanelState extends State<GamePanel> with TickerProviderStateMixin {
                 // Swiping in up direction.
                 if (details.velocity.pixelsPerSecond.dy > 0) {
                   if (!_isTransicion()) {
-                    print('Down!!!');
                     _calculateSpace(Move.down);
                     currentMovement = Move.down;
                     controllerMovements
@@ -191,7 +191,6 @@ class _GamePanelState extends State<GamePanel> with TickerProviderStateMixin {
                   }
                 }
                 if (details.velocity.pixelsPerSecond.dy < 0) {
-                  print('Up!!!');
                   if (!_isTransicion()) {
                     _calculateSpace(Move.up);
                     currentMovement = Move.up;
@@ -204,7 +203,6 @@ class _GamePanelState extends State<GamePanel> with TickerProviderStateMixin {
               onHorizontalDragEnd: (details) {
                 // Swiping in right direction.
                 if (details.velocity.pixelsPerSecond.dx > 0) {
-                  print('Right!!!');
                   if (!_isTransicion()) {
                     _calculateSpace(Move.right);
                     currentMovement = Move.right;
@@ -215,7 +213,6 @@ class _GamePanelState extends State<GamePanel> with TickerProviderStateMixin {
                 }
                 // Swiping in left direction.
                 if (details.velocity.pixelsPerSecond.dx < 0) {
-                  print('Left!!!');
                   if (!_isTransicion()) {
                     _calculateSpace(Move.left);
                     currentMovement = Move.left;
@@ -279,9 +276,6 @@ class _GamePanelState extends State<GamePanel> with TickerProviderStateMixin {
   }
 
   Positioned _buildFigureWithPossition(FigureInfo figure) {
-    print(
-        'Figure: ${figure.id}, poss( ${figure.rowIndex} , ${figure.columnIndex} ), steps: ${figure.steps},  value: ${animationMovements.value} )');
-    print('gridHeight: $gridHeight -- gridWidth: $gridWidth');
     return Positioned(
       top: (currentMovement == Move.down)
           ? gridHeight *
@@ -422,9 +416,6 @@ class _GamePanelState extends State<GamePanel> with TickerProviderStateMixin {
             availableMovement: availableMovement
           ));
         } else {
-          print(
-              'Figure: ${arrayIndexPoss[row]![column]!.id} -> available: $availableMovement');
-
           combined = false;
           availableInColumn.add((
             figure: arrayIndexPoss[row]![column]!,

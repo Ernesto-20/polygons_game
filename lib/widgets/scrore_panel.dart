@@ -1,17 +1,23 @@
 import 'dart:math';
 
+import 'package:audioplayers/audioplayers.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:circule_game/models/figure.dart';
 import 'package:circule_game/widgets/figure_view.dart';
 import 'package:circule_game/widgets/others/clip_shadow_path.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 
 class ScorePanel extends StatefulWidget {
   const ScorePanel({
     super.key,
+    required this.music,
+    required this.setEnableSound,
+    required this.getEnableSound,
   });
+
+  final AudioPlayer music;
+  final Function setEnableSound;
+  final Function getEnableSound;
 
   @override
   State<ScorePanel> createState() => _ScorePanelState();
@@ -41,6 +47,9 @@ class _ScorePanelState extends State<ScorePanel> {
                     Menu(
                       isExpandedPanel: isExpanded,
                       backHome: backHome,
+                      music: widget.music,
+                      setEnableSound: widget.setEnableSound,
+                      getEnableSound: widget.getEnableSound
                     ),
                     Expanded(
                         child: Row(
@@ -210,16 +219,26 @@ class Menu extends StatefulWidget {
     super.key,
     required this.isExpandedPanel,
     required this.backHome,
+    required this.music,
+    required this.setEnableSound,
+    required this.getEnableSound,
   });
 
   final bool isExpandedPanel;
   final Function backHome;
+  final AudioPlayer music;
+  final Function setEnableSound;
+  final Function getEnableSound;  
+
+
 
   @override
   State<Menu> createState() => _MenuState();
 }
 
 class _MenuState extends State<Menu> {
+  bool  enableMusic = true;
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -341,9 +360,11 @@ class _MenuState extends State<Menu> {
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 5),
             child: IconButton(
-              onPressed: () {},
+              onPressed: () {
+                widget.setEnableSound(!widget.getEnableSound());
+              },
               icon: Icon(
-                Icons.music_note_rounded,
+                widget.getEnableSound() ? Icons.music_note_rounded : Icons.music_off_rounded,
                 size: 33,
                 color: Theme.of(context).primaryColor,
               ),
@@ -352,9 +373,21 @@ class _MenuState extends State<Menu> {
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 5),
             child: IconButton(
-              onPressed: () {},
+              onPressed: () {
+                if ( widget.music.state == PlayerState.playing){
+                setState(() {
+                  enableMusic = true;
+                  widget.music.pause();
+                });
+                }else if ( widget.music.state == PlayerState.paused) {
+                  setState(() {
+                    enableMusic = false;
+                    widget.music.resume();
+                  });
+                }
+              },
               icon: Icon(
-                Icons.volume_up_rounded,
+                enableMusic? Icons.volume_up_rounded: Icons.volume_mute_rounded,
                 size: 33,
                 color: Theme.of(context).primaryColor,
               ),
