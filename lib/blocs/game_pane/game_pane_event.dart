@@ -3,6 +3,9 @@ part of 'game_pane_bloc.dart';
 abstract class GamePaneEvent{
 }
 
+class GamePaneLoaded extends GamePaneEvent{
+  
+}
 
 class GamePaneScoreIncreased extends GamePaneEvent{
   GamePaneScoreIncreased({required this.increase});

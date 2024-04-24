@@ -8,7 +8,9 @@ class GamePaneState extends Equatable {
       required this.record,
       required this.score,
       required this.enableSound,
-      required this.enableMusic});
+      required this.enableMusic,
+      this.users
+      });
 
   const GamePaneState.intial()
       : this._(
@@ -21,6 +23,7 @@ class GamePaneState extends Equatable {
   final GamePaneStatus status;
   final double record;
   final double score;
+  final List<({String name, double record})>? users;
   final bool enableSound;
   final bool enableMusic;
 

@@ -9,6 +9,7 @@ import 'package:circule_game/utils/colors.dart';
 import 'package:circule_game/widgets/figure_view.dart';
 import 'package:circule_game/widgets/others/clip_shadow_path.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class ScorePanel extends StatefulWidget {
@@ -107,7 +108,6 @@ class InformationBar extends StatelessWidget {
           EdgeInsets.only(top: 50, left: 30, right: isExpandedPanel ? 50 : 30),
       // alignment: Alignment.centerLeft,
       child: Column(
-        // crossAxisAlignment: CrossAxisAlignment.s,
         children: [
           AnimatedContainer(
             duration: durationEffect,
@@ -124,7 +124,7 @@ class InformationBar extends StatelessWidget {
                 const Text(
                   'Polygon',
                   style: TextStyle(
-                      color: acent, fontWeight: FontWeight.bold, fontSize: 34),
+                      color: Colors.white, fontWeight: FontWeight.bold, fontSize: 34),
                 ),
                 const SizedBox(
                   height: 10,
@@ -170,6 +170,81 @@ class InformationBar extends StatelessWidget {
                   ),
                 ),
               ],
+            ),
+          ),
+          Visibility(
+            visible: isExpandedPanel,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 15),
+              // margin: EdgeInsets.only(top: 20),
+              // color: darkSecondary,
+              child: Column(
+                children: [
+                  ListTile(
+                    leading: Image.asset(
+                      'assets/images/first.png',
+                      width: 35,
+                      height: 35,
+                    ),
+                    title: const Text(
+                      'Ernesto',
+                      style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 20),
+                    ),
+                    subtitle: const Text(
+                      '45.830',
+                      style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16),
+                    ),
+                  ),
+                  ListTile(
+                    leading: Image.asset(
+                      'assets/images/second.png',
+                      width: 35,
+                      height: 35,
+                    ),
+                    title: const Text(
+                      'Laura',
+                      style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 20),
+                    ),
+                    subtitle: const Text(
+                      '45.830',
+                      style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16),
+                    ),
+                  ),
+                  ListTile(
+                    leading: Image.asset(
+                      'assets/images/third.png',
+                      width: 35,
+                      height: 35,
+                    ),
+                    title: const Text(
+                      'Estevan',
+                      style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 20),
+                    ),
+                    subtitle: const Text(
+                      '45.830',
+                      style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16),
+                    ),
+                  )
+                ],
+              ),
             ),
           ),
           Visibility(

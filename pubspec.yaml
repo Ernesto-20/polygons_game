@@ -40,6 +40,7 @@ dependencies:
   carousel_slider: ^4.2.1
   flutter_bloc: ^8.1.5
   firebase_core: ^2.30.0
+  cloud_firestore: ^4.17.0
 
 dev_dependencies:
   flutter_test:
@@ -74,6 +75,9 @@ flutter:
     - assets/images/home.png
     - assets/images/one_example.png
     - assets/images/two_example.png
+    - assets/images/first.png
+    - assets/images/second.png
+    - assets/images/third.png
     # - images/a_dot_ham.jpeg
 
   # An image asset can refer to one or more resolution-specific "variants", see

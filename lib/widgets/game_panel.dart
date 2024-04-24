@@ -47,6 +47,8 @@ class _GamePanelState extends State<GamePanel> with TickerProviderStateMixin {
   @override
   void initState() {
     super.initState();
+    context.read<GamePaneBloc>().add(GamePaneLoaded());
+
     lastState = figuresPossitions.map((e) => e.copyWidth()).toList();
     controllerMovements = AnimationController(
         vsync: this, duration: const Duration(milliseconds: 400));
